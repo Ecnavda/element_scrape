@@ -59,7 +59,7 @@ def parseElements(ePage: str, cPage: str):
                 cont = cont.replace("<sup>", "^")
                 cont = cont.replace("</sup>", ",")
                 electronConfiguration += cont
-                electronConfiguration = electronConfiguration[:-1] # Removing trailing comma
+            electronConfiguration = electronConfiguration[:-1] # Removing trailing comma
             elements[x].setElectronConfiguration(electronConfiguration)
         
         return elements
@@ -88,6 +88,6 @@ if __name__ == "__main__":
     elementPageResult = getPage("https://en.wikipedia.org/wiki/List_of_chemical_elements")
     configPageResult = getPage("https://sciencenotes.org/list-of-electron-configurations-of-elements/")
     elementsResult = parseElements(elementPageResult, configPageResult)
-
+    
     with open("elements.sql", '+w') as f:
         f.write(generateElementsSQL(elementsResult))
