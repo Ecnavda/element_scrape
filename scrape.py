@@ -20,6 +20,18 @@ class Element:
         self.electronConfiguration = electronConfiguration
 
 
+class Ion:
+    def __init__(self, abbr, name, charge, ionType):
+        self.abbr = abbr
+        self.name = name
+        self.charge = charge
+        self.ionType = ionType
+
+    @classmethod
+    def error(cls):
+        return cls("Error", "Error", "Error", "Error")
+
+
 def getPage(address):
     r = requests.get(address)
 
@@ -67,6 +79,18 @@ def parseElements(ePage: str, cPage: str):
     else:
         return [Element.error()]
 
+
+def parseIons(page: str):
+    if page != "Error":
+        soup = BeautifulSoup(page, "html.parser")
+        tables = soup.find_all("table", "wikitable") # Gets both Cation and Anion tables
+        cationTable = tables[0]
+        anionTable = tables[1]
+        # first cation at [2] (Aluminum) to [26] (Zinc)
+        cationsSimple = cationTable.find_all("tr")[2:26]
+        # Polyatomic from [28] - [30]
+        cationsPoly = cationTable.find_all("tr")[28:30]
+
     
 def generateElementsSQL(elements: List[Element]):
     if elements[0].name != "Error":
@@ -82,12 +106,20 @@ def generateElementsSQL(elements: List[Element]):
         return sql
     else:
         return "Error"
-   
 
-if __name__ == "__main__":
+
+def main():
     elementPageResult = getPage("https://en.wikipedia.org/wiki/List_of_chemical_elements")
     configPageResult = getPage("https://sciencenotes.org/list-of-electron-configurations-of-elements/")
     elementsResult = parseElements(elementPageResult, configPageResult)
+
+    ionPageResult = getPage("https://en.wikipedia.org/wiki/Ion")
+    ionsResult = parseIons(ionPageResult)
     
     with open("elements.sql", '+w') as f:
         f.write(generateElementsSQL(elementsResult))
+   
+
+if __name__ == "__main__":
+    ionPageResult = getPage("https://en.wikipedia.org/wiki/Ion")
+    parseIons(ionPageResult)
